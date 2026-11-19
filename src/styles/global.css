@@ -1,14 +1,16 @@
-@import '@fontsource-variable/geist';
+@import '@fontsource-variable/inter';
 
 :root {
-  --paper: #ffffff;
-  --panel: #f2f3f5;
-  --ink: #16181d;
-  --muted: #5f646d;
-  --rule: #e3e5e8;
-  --signal: #1f4bff;
+  /* Warm, low-contrast neutrals. */
+  --paper: #faf8f5;
+  --hero: #bfb8ae;
+  --panel: #e9e4dc;
+  --ink: #1f1d1a;
+  --muted: #5f5850;
+  --rule: #e2dcd2;
+  --signal: #6b635a;
 
-  --font: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   /* Type scale, ratio ~1.25 from 17px body */
   --step--1: 0.875rem;
@@ -21,7 +23,7 @@
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --max: 76rem;
   --measure: 38rem;
-  --radius-lg: 1.25rem;
+  --radius-lg: 1.25rem; /* cards */
   --radius-sm: 0.5rem;
   --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
 
@@ -46,7 +48,7 @@ body {
   font-family: var(--font);
   font-size: var(--step-0);
   line-height: 1.55;
-  font-feature-settings: 'ss01', 'cv11';
+  font-feature-settings: 'cv11';
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -94,13 +96,13 @@ a:hover {
 }
 
 :focus-visible {
-  outline: 2px solid var(--signal);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 ::selection {
-  background: #dfe6ff;
+  background: #e4ddd2;
 }
 
 .wrap {

@@ -10,6 +10,22 @@ export const site = {
   },
 } as const;
 
+/**
+ * Home hero. `lines` are typed one at a time on wider screens and shown as
+ * static paragraphs on phones. `particles` is the sentence scattered behind
+ * them, laid out in reading order.
+ */
+export const hero = {
+  lines: [
+    "Hey! You've found Jen :)",
+    'An embodied AI researcher and robotics engineer in SF.',
+    'Currently building hospital robots at Collaborative Robotics.',
+    'Before that: AR for surgical robots, and fintech at Mercury.',
+  ],
+  particles:
+    "Hey! You've found Jen, an embodied AI researcher and robotics engineer in SF, building robots that work beside people. Before that: surgical robots and fintech.",
+} as const;
+
 export interface Role {
   company: string;
   title: string;

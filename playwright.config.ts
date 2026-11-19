@@ -23,6 +23,8 @@ export default defineConfig({
     {
       name: 'mobile',
       testIgnore: /responsive\.spec\.ts/,
+      // Tests tagged @desktop need a mouse and a wide viewport.
+      grepInvert: /@desktop/,
       use: { ...devices['Pixel 7'], launchOptions },
     },
   ],

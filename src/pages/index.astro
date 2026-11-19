@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
 import ProjectTile from '../components/ProjectTile.astro';
 import { getProjects } from '../lib/projects';
 import { experience, education, skills, site } from '../data/site';
@@ -7,34 +8,19 @@ import { formatPeriod, formatYear, withBase } from '../lib/format';
 
 const projects = await getProjects();
 const featured = projects.filter((p) => p.data.featured);
-const [lead, ...rest] = featured;
 const more = projects.filter((p) => !p.data.featured);
 ---
 
 <Base>
-  <section class="hero wrap" aria-labelledby="hero-title">
-    <h1 id="hero-title" class="hero-name">
-      <span>Jennifer Ye</span>
-    </h1>
-    <p class="hero-line">
-      <span>
-        Software engineer building for robots and the people who work beside them, from AR guidance
-        in the operating room to fleets moving through hospitals.
-      </span>
-    </p>
-    <p class="hero-now">
-      <span>Currently at Collaborative Robotics.</span>
-    </p>
-  </section>
+  <Hero />
 
   <section id="work" class="work wrap" aria-labelledby="work-title">
     <h2 id="work-title" class="section-title">
-      Selected work
+      Featured work
     </h2>
-    {lead && <ProjectTile project={lead} size="large" />}
-    <div class="pair">
-      {rest.map((p) => (
-        <ProjectTile project={p} size="medium" />
+    <div class="grid">
+      {featured.map((p) => (
+        <ProjectTile project={p} />
       ))}
     </div>
 
@@ -133,57 +119,6 @@ const more = projects.filter((p) => !p.data.featured);
 </Base>
 
 <style>
-  /* The one orchestrated moment: hero lines rise from behind a mask on load. */
-  .hero {
-    padding-block: clamp(5rem, 14vw, 11rem) clamp(4rem, 10vw, 8rem);
-    display: grid;
-    gap: 1.75rem;
-  }
-
-  .hero > * {
-    overflow: hidden;
-  }
-
-  .hero span {
-    display: block;
-    animation: rise 1s var(--ease) both;
-  }
-
-  .hero-line span {
-    animation-delay: 0.12s;
-  }
-
-  .hero-now span {
-    animation-delay: 0.24s;
-  }
-
-  @keyframes rise {
-    from {
-      transform: translateY(105%);
-      opacity: 0;
-    }
-  }
-
-  .hero-name {
-    font-size: var(--step-4);
-    letter-spacing: -0.045em;
-    line-height: 0.95;
-    padding-bottom: 0.08em;
-  }
-
-  .hero-line {
-    font-size: var(--step-2);
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-    max-width: 22em;
-    color: var(--muted);
-  }
-
-  .hero-now {
-    font-size: var(--step--1);
-    color: var(--muted);
-  }
-
   .work,
   .about,
   .contact {
@@ -191,16 +126,14 @@ const more = projects.filter((p) => !p.data.featured);
     border-top: 1px solid var(--rule);
   }
 
-  .pair {
-    display: grid;
-    gap: 3rem 2rem;
-    margin-top: 4rem;
+  .work {
+    border-top: 0;
   }
 
-  @media (min-width: 760px) {
-    .pair {
-      grid-template-columns: 1fr 1fr;
-    }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: 3rem 1.25rem;
   }
 
   .more {

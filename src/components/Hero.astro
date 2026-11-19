@@ -1,0 +1,278 @@
+---
+import { hero, site } from '../data/site';
+import { layoutParticles } from '../lib/particles';
+import { withBase } from '../lib/format';
+
+const particles = layoutParticles(hero.particles);
+---
+
+<section class="hero" aria-labelledby="hero-title" data-hero>
+  <h1 id="hero-title" class="visually-hidden">
+    {site.name}
+  </h1>
+
+  <div class="field" aria-hidden="true">
+    {particles.map((p) => (
+      <span
+        class="particle"
+        style={`left:${p.x}%;top:${p.y}%`}
+        data-x={p.x}
+        data-y={p.y}
+        data-phase={p.phase}
+        data-speed={p.speed}
+        data-depth={p.depth}
+      >
+        {p.char}
+      </span>
+    ))}
+  </div>
+
+  <!-- Phones: the intro as plain paragraphs. Wider screens: visually hidden but still read aloud. -->
+  <div class="intro" data-intro>
+    {hero.lines.map((line) => (
+      <p>{line}</p>
+    ))}
+  </div>
+
+  <!-- Wider screens: the same lines typed one at a time. Decorative duplicate of .intro. -->
+  <p class="typer" aria-hidden="true" data-typer>
+    <span data-typed>{hero.lines[0]}</span>
+    <span class="caret"></span>
+  </p>
+
+  <div class="dot" aria-hidden="true" data-dot></div>
+
+  <a class="cta" href={withBase('/#work')}>
+    See my work
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M6 1v10M2 7l4 4 4-4" stroke="currentColor" stroke-width="1.5"></path>
+    </svg>
+  </a>
+</section>
+
+<script>
+  import { hero } from '../data/site';
+  import { typedAt } from '../lib/typewriter';
+
+  function start() {
+    const root = document.querySelector<HTMLElement>('[data-hero]');
+    if (!root || root.dataset.running) return;
+    root.dataset.running = 'true';
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+    const field = root.querySelector<HTMLElement>('.field');
+    const particles = [...root.querySelectorAll<HTMLElement>('.particle')].map((el) => ({
+      el,
+      x: Number(el.dataset.x) / 100,
+      y: Number(el.dataset.y) / 100,
+      phase: Number(el.dataset.phase),
+      speed: Number(el.dataset.speed),
+      depth: Number(el.dataset.depth),
+    }));
+    const typed = root.querySelector<HTMLElement>('[data-typed]');
+    const dot = root.querySelector<HTMLElement>('[data-dot]');
+    if (!typed || !dot || !field) return;
+
+    // Reduced motion: everything rests sharp; the first line stays put.
+    if (reduce) {
+      root.dataset.motion = 'reduced';
+      return;
+    }
+    root.dataset.motion = 'on';
+
+    let pointer: { x: number; y: number } | null = null;
+    if (finePointer) {
+      root.addEventListener('pointermove', (e) => {
+        const b = root.getBoundingClientRect();
+        pointer = { x: e.clientX - b.left, y: e.clientY - b.top };
+        dot.style.transform = `translate(${pointer.x}px, ${pointer.y}px)`;
+        root.dataset.pointer = 'in';
+      });
+      root.addEventListener('pointerleave', () => {
+        pointer = null;
+        delete root.dataset.pointer;
+      });
+    }
+
+    let visible = true;
+    new IntersectionObserver(([entry]) => {
+      visible = !!entry?.isIntersecting;
+    }).observe(root);
+
+    const t0 = performance.now();
+    let lastTyped = '';
+    const frame = (now: number) => {
+      if (!root.isConnected) return;
+      requestAnimationFrame(frame);
+      if (!visible || document.hidden) return;
+      const t = (now - t0) / 1000;
+
+      // Field geometry relative to the hero, read once per frame (no per-letter layout reads).
+      const fx = field.offsetLeft;
+      const fy = field.offsetTop;
+      const fw = field.offsetWidth;
+      const fh = field.offsetHeight;
+
+      const text = typedAt(hero.lines, t);
+      if (text !== lastTyped) {
+        typed.textContent = text;
+        lastTyped = text;
+      }
+
+      for (const p of particles) {
+        const bob = Math.sin(t * p.speed + p.phase) * 14;
+        const blurPhase = (Math.sin(t * p.speed * 0.7 + p.phase * 1.7) + 1) / 2;
+        let haze = blurPhase * blurPhase * p.depth;
+        if (pointer) {
+          const dx = fx + p.x * fw - pointer.x;
+          const dy = fy + p.y * fh + bob - pointer.y;
+          haze = Math.max(0, haze - Math.max(0, 1 - Math.hypot(dx, dy) / 200));
+        }
+        p.el.style.transform = `translate(-50%, calc(-50% + ${bob.toFixed(1)}px))`;
+        p.el.style.filter = haze > 0.02 ? `blur(${(haze * 7).toFixed(2)}px)` : 'none';
+        p.el.style.opacity = (1 - haze * 0.65).toFixed(2);
+      }
+    };
+    requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('astro:page-load', start);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    height: min(100svh, 56rem);
+    min-height: 34rem;
+    margin-top: -3.5rem; /* sit under the transparent header */
+    background: var(--hero);
+    overflow: hidden;
+  }
+
+  .field {
+    position: absolute;
+    inset: 4.5rem 0 5rem;
+  }
+
+  .particle {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1;
+    pointer-events: none;
+    will-change: transform, filter, opacity;
+  }
+
+  .intro {
+    position: absolute;
+    inset: auto var(--gutter) 6rem;
+    display: grid;
+    gap: 1rem;
+    max-width: 34rem;
+    font-size: clamp(1.375rem, 1rem + 1.6vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    z-index: 2;
+  }
+
+  .typer {
+    display: none;
+    position: absolute;
+    inset: 50% 0 auto;
+    transform: translateY(-50%);
+    margin: 0;
+    padding-inline: var(--gutter);
+    text-align: center;
+    font-size: 1.4375rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .caret {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: -0.12em;
+    background: currentColor;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 3;
+  }
+
+  .hero[data-pointer] .dot {
+    opacity: 0.9;
+  }
+
+  .cta {
+    position: absolute;
+    left: 50%;
+    bottom: 1.75rem;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-decoration: none;
+    z-index: 3;
+  }
+
+  @media (min-width: 768px) {
+    .intro {
+      /* Visually hidden, still announced. */
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .typer {
+      display: block;
+    }
+
+    .hero[data-motion='on'] {
+      cursor: none;
+    }
+
+    .hero[data-motion='on'] .cta {
+      cursor: pointer;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .caret {
+      animation: none;
+    }
+  }
+</style>

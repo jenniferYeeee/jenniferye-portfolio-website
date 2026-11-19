@@ -42,14 +42,21 @@ video:
 Keep videos H.264 MP4 under ~15 MB (`ffmpeg -i in.mov -vcodec libx264 -crf 26 -preset veryfast -an out.mp4`).
 `npm run media:report` lists what's still a placeholder.
 
-**Change copy.** Bio and contact live in `src/pages/index.astro` and `src/data/site.ts`.
+**Change copy.** The hero lines and particle sentence are `hero` in `src/data/site.ts`
+(unit tests cap each typed line at 64 characters; e2e checks each fits on one line from
+768px up). Bio and contact live in `src/pages/index.astro` and `src/data/site.ts`.
 
 ## Design rules
 
 - Palette and type scale are CSS variables in `src/styles/global.css`. Don't add colors.
-- One typeface (Geist). Sentence case. No all-caps labels.
-- One orchestrated motion moment (hero) plus view transitions between tile and project
-  page. Everything respects `prefers-reduced-motion`.
+- One typeface (Inter). Sentence case. No all-caps labels. Warm, low-contrast neutrals.
+- The hero is the one motion moment: the intro sentence's letters laid out in reading
+  order, bobbing and drifting in and out of focus (sharp near the cursor), with the intro
+  typed one line at a time in the middle (static paragraphs on phones). Timing lives in
+  `src/lib/typewriter.ts`, layout in `src/lib/particles.ts`. Plus view transitions between
+  tile and project page. Everything respects `prefers-reduced-motion`.
+- Tests that need a mouse or a wide viewport are tagged `@desktop` in the title; the
+  mobile project skips them via `grepInvert`.
 - Internal URLs go through `withBase()`; `check:dist` fails otherwise.
 
 ## Local setup
