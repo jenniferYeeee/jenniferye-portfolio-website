@@ -76,6 +76,7 @@ h3 {
   letter-spacing: -0.025em;
   line-height: 1.08;
   text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 p {
