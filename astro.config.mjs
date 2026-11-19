@@ -1,10 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// GitHub Pages project site lives under /<repo>/. If you move to a custom
-// domain, set SITE_URL=https://yourdomain.com and SITE_BASE=/ in CI.
-const site = process.env.SITE_URL ?? 'https://jenniferyeeee.github.io';
-const base = process.env.SITE_BASE ?? '/jenniferye-portfolio-website';
+// Hosted on Cloudflare Pages at the root of its own domain. To serve from a
+// sub-path instead (e.g. a GitHub Pages project site), set SITE_BASE=/<repo>.
+const site = process.env.SITE_URL ?? 'https://jenye.pages.dev';
+const base = process.env.SITE_BASE ?? '/';
 
 export default defineConfig({
   site,

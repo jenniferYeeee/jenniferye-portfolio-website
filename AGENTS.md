@@ -1,6 +1,15 @@
 # Working in this repo
 
-Jennifer Ye's portfolio. Astro + TypeScript, static output, deployed to GitHub Pages.
+Jennifer Ye's portfolio. Astro + TypeScript, static output, hosted on Cloudflare Pages
+(free plan) at the root of its `*.pages.dev` domain.
+
+## How deploys work
+
+CI runs `npm run verify` on every push. Only when it passes on `main` does CI move the
+`production` branch to that commit; Cloudflare Pages builds and serves `production`.
+Never push to `production` by hand. The old GitHub Pages address
+(`jenniferyeeee.github.io/jenniferye-portfolio-website/`) serves a redirect built by
+`scripts/build-redirect.mjs`.
 
 ## The one rule
 
@@ -39,7 +48,7 @@ video:
   alt: What the video shows, in a sentence.
 ```
 
-Keep videos H.264 MP4 under ~15 MB (`ffmpeg -i in.mov -vcodec libx264 -crf 26 -preset veryfast -an out.mp4`).
+Keep videos H.264 MP4 under ~15 MB; `check:dist` fails any file over Cloudflare's 25 MiB limit (`ffmpeg -i in.mov -vcodec libx264 -crf 26 -preset veryfast -an out.mp4`).
 `npm run media:report` lists what's still a placeholder.
 
 **Change copy.** The hero lines and particle sentence are `hero` in `src/data/site.ts`

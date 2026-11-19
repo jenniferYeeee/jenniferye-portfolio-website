@@ -6,7 +6,7 @@ import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
-const BASE = (process.env.SITE_BASE ?? '/jenniferye-portfolio-website').replace(/\/$/, '');
+const BASE = (process.env.SITE_BASE ?? '/').replace(/\/$/, '');
 
 function walk(dir) {
   return readdirSync(dir).flatMap((name) => {
@@ -20,8 +20,22 @@ if (!existsSync(DIST)) {
   process.exit(1);
 }
 
-const htmlFiles = walk(DIST).filter((f) => f.endsWith('.html'));
+const allFiles = walk(DIST);
+const htmlFiles = allFiles.filter((f) => f.endsWith('.html'));
 const errors = [];
+
+// Cloudflare Pages (free) serves at most 20,000 files of up to 25 MiB each.
+const MAX_FILE_BYTES = 25 * 1024 * 1024;
+const MAX_FILES = 20000;
+if (allFiles.length > MAX_FILES)
+  errors.push(`dist has ${allFiles.length} files (limit ${MAX_FILES})`);
+for (const f of allFiles) {
+  const size = statSync(f).size;
+  if (size > MAX_FILE_BYTES)
+    errors.push(
+      `${relative(DIST, f)} is ${(size / 1048576).toFixed(1)} MiB (limit 25 MiB; compress it)`,
+    );
+}
 
 function resolveTarget(urlPath) {
   if (!urlPath.startsWith(BASE + '/') && urlPath !== BASE) return null;

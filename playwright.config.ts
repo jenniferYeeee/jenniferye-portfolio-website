@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 4321;
-const BASE = process.env.SITE_BASE ?? '/jenniferye-portfolio-website';
+const BASE = (process.env.SITE_BASE ?? '/').replace(/\/$/, '');
 
 // Use a preinstalled Chrome when Playwright's own download isn't available.
 const exe = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
