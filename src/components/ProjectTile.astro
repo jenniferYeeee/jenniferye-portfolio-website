@@ -1,0 +1,82 @@
+---
+import Media from './Media.astro';
+import type { ProjectEntry } from '../lib/projects';
+import { formatYear, withBase } from '../lib/format';
+
+interface Props {
+  project: ProjectEntry;
+  size: 'large' | 'medium';
+}
+
+const { project, size } = Astro.props;
+const { data, id } = project;
+---
+
+<article class:list={['tile', `tile--${size}`]} data-project={id}>
+  <a class="link" href={withBase(`/work/${id}/`)}>
+    <Media media={data.video} kind="video" variant="tile" transitionName={`media-${id}`} />
+    <div class="text">
+      <h3 transition:name={`title-${id}`}>{data.title}</h3>
+      <p class="summary">{data.summary}</p>
+      <p class="meta">
+        {data.org}, {formatYear(data.start, data.end)}
+      </p>
+    </div>
+  </a>
+</article>
+
+<style>
+  .link {
+    display: grid;
+    gap: 1.25rem;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .link:hover {
+    color: inherit;
+  }
+
+  .link :global(.media) {
+    transition: transform 0.6s var(--ease);
+  }
+
+  .link:hover :global(.media) {
+    transform: scale(0.988);
+  }
+
+  .text {
+    display: grid;
+    gap: 0.4rem;
+    max-width: var(--measure);
+  }
+
+  h3 {
+    font-size: var(--step-1);
+  }
+
+  .tile--large h3 {
+    font-size: var(--step-2);
+  }
+
+  .link:hover h3 {
+    color: var(--signal);
+  }
+
+  .summary {
+    color: var(--muted);
+  }
+
+  .meta {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  @media (min-width: 900px) {
+    .tile--large .link {
+      grid-template-columns: 2fr 1fr;
+      align-items: end;
+      gap: 2.5rem;
+    }
+  }
+</style>

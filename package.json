@@ -1,0 +1,47 @@
+{
+  "name": "jenniferye-portfolio-website",
+  "version": "1.0.0",
+  "description": "Personal portfolio of Jennifer Ye",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "astro check",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "check:dist": "node scripts/check-dist.mjs",
+    "media:report": "node scripts/media-report.mjs",
+    "verify:fast": "npm run format:check && npm run lint && npm run typecheck && npm run test:unit",
+    "verify": "npm run verify:fast && npm run build && npm run check:dist && npm run test:e2e",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.3.0",
+    "astro": "^7.4.13"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@axe-core/playwright": "^4.14.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.15.0",
+    "eslint-plugin-astro": "^3.2.1",
+    "globals": "^17.14.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.10.1",
+    "prettier-plugin-astro": "^1.1.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1",
+    "yaml": "^2.9.1"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  }
+}

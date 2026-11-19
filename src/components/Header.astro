@@ -1,0 +1,74 @@
+---
+import { site } from '../data/site';
+import { withBase } from '../lib/format';
+
+const home = withBase('/');
+---
+
+<header class="header" transition:persist>
+  <div class="wrap bar">
+    <a class="mark" href={home} aria-label={`${site.name}, home`}>
+      {site.name}
+    </a>
+    <nav aria-label="Primary">
+      <ul>
+        <li>
+          <a href={`${home}#work`}>Work</a>
+        </li>
+        <li>
+          <a href={`${home}#about`}>About</a>
+        </li>
+        <li>
+          <a href={`${home}#contact`}>Contact</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(255 255 255 / 0.78);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  :global(html[data-scrolled]) .header {
+    border-bottom-color: var(--rule);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3.5rem;
+  }
+
+  .mark {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  ul {
+    display: flex;
+    gap: clamp(1rem, 3vw, 2rem);
+    list-style: none;
+    padding: 0;
+  }
+
+  nav a {
+    font-size: var(--step--1);
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    color: var(--ink);
+  }
+</style>

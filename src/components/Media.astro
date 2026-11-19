@@ -1,0 +1,125 @@
+---
+import type { Media } from '../content/schema';
+import { withBase } from '../lib/format';
+
+interface Props {
+  media: Media;
+  kind: 'video' | 'diagram';
+  /** Tiles show a still; project pages show playable video. */
+  variant: 'tile' | 'page';
+  /** Must be unique on the page; shared with the matching element on the other page. */
+  transitionName: string;
+}
+
+const { media, kind, variant, transitionName } = Astro.props;
+const pendingLabel = kind === 'video' ? 'Demo video coming soon' : 'System diagram coming soon';
+const isVideoFile = media.status === 'ready' && /\.(mp4|webm)$/.test(media.src);
+---
+
+<figure
+  class:list={['media', `media--${variant}`, `media--${kind}`]}
+  data-media={kind}
+  data-status={media.status}
+  transition:name={transitionName}
+>
+  {media.status === 'pending' ? (
+    <div class="placeholder" role="img" aria-label={pendingLabel}>
+      <svg class="frame" viewBox="0 0 64 64" aria-hidden="true">
+        <line x1="12" y1="52" x2="52" y2="52" />
+        <line x1="12" y1="52" x2="12" y2="12" />
+        <line x1="12" y1="52" x2="34" y2="34" />
+        <circle cx="12" cy="52" r="2.5" />
+      </svg>
+      {variant === 'page' && <span class="placeholder-text">{pendingLabel}</span>}
+    </div>
+  ) : isVideoFile && variant === 'page' ? (
+    <video
+      controls
+      playsinline
+      preload="metadata"
+      poster={media.poster ? withBase(media.poster) : undefined}
+      aria-label={media.alt}
+    >
+      <source
+        src={withBase(media.src)}
+        type={media.src.endsWith('.webm') ? 'video/webm' : 'video/mp4'}
+      />
+    </video>
+  ) : isVideoFile ? (
+    media.poster ? (
+      <img src={withBase(media.poster)} alt={media.alt} loading="lazy" decoding="async" />
+    ) : (
+      <video muted playsinline preload="metadata" aria-label={media.alt}>
+        <source src={withBase(media.src)} />
+      </video>
+    )
+  ) : (
+    <img src={withBase(media.src)} alt={media.alt} loading="lazy" decoding="async" />
+  )}
+</figure>
+
+<style>
+  .media {
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    background: var(--panel);
+    border-radius: var(--radius-lg);
+  }
+
+  .media--video {
+    aspect-ratio: 16 / 9;
+  }
+
+  .media--diagram {
+    aspect-ratio: 16 / 10;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+  }
+
+  .media img,
+  .media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .media--diagram img {
+    object-fit: contain;
+    padding: 4%;
+  }
+
+  /* Placeholder: a fine coordinate grid with a frame triad, a nod to pose estimation. */
+  .placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background-image:
+      linear-gradient(to right, rgb(22 24 29 / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(22 24 29 / 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: center;
+  }
+
+  .frame {
+    position: absolute;
+    left: 1.25rem;
+    bottom: 1.25rem;
+    width: 3rem;
+    height: 3rem;
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    fill: var(--muted);
+    opacity: 0.6;
+  }
+
+  .placeholder-text {
+    font-size: var(--step--1);
+    color: var(--muted);
+    background: var(--paper);
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+  }
+</style>

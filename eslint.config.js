@@ -1,0 +1,18 @@
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import astro from 'eslint-plugin-astro';
+import globals from 'globals';
+
+export default [
+  { ignores: ['dist/', '.astro/', 'node_modules/', 'playwright-report/', 'test-results/'] },
+  js.configs.recommended,
+  ...tseslint.configs.strict,
+  ...astro.configs.recommended,
+  {
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    rules: {
+      'no-console': ['error', { allow: ['error', 'log', 'table'] }],
+      '@typescript-eslint/no-non-null-assertion': 'error',
+    },
+  },
+];

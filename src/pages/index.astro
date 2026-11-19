@@ -1,0 +1,341 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectTile from '../components/ProjectTile.astro';
+import { getProjects } from '../lib/projects';
+import { experience, education, skills, site } from '../data/site';
+import { formatPeriod, formatYear, withBase } from '../lib/format';
+
+const projects = await getProjects();
+const featured = projects.filter((p) => p.data.featured);
+const [lead, ...rest] = featured;
+const more = projects.filter((p) => !p.data.featured);
+---
+
+<Base>
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="hero-name">
+      <span>Jennifer Ye</span>
+    </h1>
+    <p class="hero-line">
+      <span>
+        Software engineer building for robots and the people who work beside them, from AR guidance
+        in the operating room to fleets moving through hospitals.
+      </span>
+    </p>
+    <p class="hero-now">
+      <span>Currently at Collaborative Robotics.</span>
+    </p>
+  </section>
+
+  <section id="work" class="work wrap" aria-labelledby="work-title">
+    <h2 id="work-title" class="section-title">
+      Selected work
+    </h2>
+    {lead && <ProjectTile project={lead} size="large" />}
+    <div class="pair">
+      {rest.map((p) => (
+        <ProjectTile project={p} size="medium" />
+      ))}
+    </div>
+
+    {more.length > 0 && (
+      <div class="more">
+        <h3 class="more-title">Other projects</h3>
+        <ul>
+          {more.map((p) => (
+            <li data-project={p.id}>
+              <a href={withBase(`/work/${p.id}/`)}>
+                <span class="more-name" transition:name={`title-${p.id}`}>
+                  {p.data.title}
+                </span>
+                <span class="more-summary">{p.data.summary}</span>
+                <span class="more-year">{formatYear(p.data.start, p.data.end)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </section>
+
+  <section id="about" class="about wrap" aria-labelledby="about-title">
+    <h2 id="about-title" class="section-title">
+      About
+    </h2>
+    <div class="about-grid">
+      <div class="bio">
+        <p>
+          I studied computer science and molecular biology at Johns Hopkins, which is how I ended up
+          writing software for surgical robots before moving into fleet robotics.
+        </p>
+        <p>
+          I like problems where software meets the physical world: noisy sensors, flaky networks,
+          and people who need the system to just work. I've also shipped fintech infrastructure at
+          Mercury and tested hardware for NASA's DAVINCI mission to Venus.
+        </p>
+      </div>
+
+      <div class="cv">
+        <h3>Experience</h3>
+        <ol class="timeline">
+          {experience.map((r) => (
+            <li>
+              <p class="when">{formatPeriod(r.start, r.end)}</p>
+              <p class="what">
+                <strong>{r.title}</strong>, {r.company}
+              </p>
+              <p class="note">{r.note}</p>
+            </li>
+          ))}
+        </ol>
+
+        <h3>Education</h3>
+        <p class="what">
+          <strong>{education.school}</strong>
+        </p>
+        <p class="note">
+          {education.degree}, {formatYear(education.start, education.end)}
+        </p>
+
+        <h3>Tools</h3>
+        <dl class="skills">
+          {skills.map((s) => (
+            <div>
+              <dt>{s.group}</dt>
+              <dd>{s.items.join(', ')}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact wrap" aria-labelledby="contact-title">
+    <h2 id="contact-title" class="section-title">
+      Get in touch
+    </h2>
+    <a class="email" href={`mailto:${site.email}`}>
+      {site.email}
+    </a>
+    <ul class="social">
+      <li>
+        <a href={site.links.linkedin} rel="me noopener" target="_blank">
+          LinkedIn
+        </a>
+      </li>
+      <li>
+        <a href={site.links.github} rel="me noopener" target="_blank">
+          GitHub
+        </a>
+      </li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  /* The one orchestrated moment: hero lines rise from behind a mask on load. */
+  .hero {
+    padding-block: clamp(5rem, 14vw, 11rem) clamp(4rem, 10vw, 8rem);
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .hero > * {
+    overflow: hidden;
+  }
+
+  .hero span {
+    display: block;
+    animation: rise 1s var(--ease) both;
+  }
+
+  .hero-line span {
+    animation-delay: 0.12s;
+  }
+
+  .hero-now span {
+    animation-delay: 0.24s;
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(105%);
+      opacity: 0;
+    }
+  }
+
+  .hero-name {
+    font-size: var(--step-4);
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+    padding-bottom: 0.08em;
+  }
+
+  .hero-line {
+    font-size: var(--step-2);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    max-width: 22em;
+    color: var(--muted);
+  }
+
+  .hero-now {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .work,
+  .about,
+  .contact {
+    padding-block: clamp(3.5rem, 8vw, 6rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .pair {
+    display: grid;
+    gap: 3rem 2rem;
+    margin-top: 4rem;
+  }
+
+  @media (min-width: 760px) {
+    .pair {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .more {
+    margin-top: 5rem;
+  }
+
+  .more-title {
+    font-size: var(--step-1);
+    margin-bottom: 0.5rem;
+  }
+
+  .more ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .more li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .more a {
+    display: grid;
+    gap: 0.25rem 2rem;
+    padding-block: 1.25rem;
+    text-decoration: none;
+  }
+
+  .more-name {
+    font-weight: 600;
+  }
+
+  .more-summary {
+    color: var(--muted);
+  }
+
+  .more-year {
+    color: var(--muted);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .more a:hover .more-name {
+    color: var(--signal);
+  }
+
+  @media (min-width: 900px) {
+    .more a {
+      grid-template-columns: 16rem 1fr auto;
+      align-items: baseline;
+    }
+  }
+
+  .about-grid {
+    display: grid;
+    gap: 3rem;
+  }
+
+  @media (min-width: 900px) {
+    .about-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+    }
+  }
+
+  .bio {
+    display: grid;
+    align-content: start;
+    gap: 1.25rem;
+    font-size: var(--step-1);
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    max-width: var(--measure);
+  }
+
+  .cv h3 {
+    font-size: var(--step-0);
+    margin: 2.5rem 0 1rem;
+  }
+
+  .cv h3:first-child {
+    margin-top: 0;
+  }
+
+  .timeline {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .when,
+  .note {
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+
+  .what strong {
+    font-weight: 600;
+  }
+
+  .skills {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .skills div {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: 1rem;
+  }
+
+  .skills dt {
+    color: var(--muted);
+    font-size: var(--step--1);
+    padding-top: 0.1em;
+  }
+
+  .contact {
+    padding-bottom: clamp(5rem, 10vw, 8rem);
+  }
+
+  .email {
+    font-size: var(--step-3);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+    word-break: break-word;
+  }
+
+  .social {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+    margin-top: 1.5rem;
+    color: var(--muted);
+  }
+</style>

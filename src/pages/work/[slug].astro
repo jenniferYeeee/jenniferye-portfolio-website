@@ -1,0 +1,197 @@
+---
+import Base from '../../layouts/Base.astro';
+import Media from '../../components/Media.astro';
+import { render } from 'astro:content';
+import { getProjects, nextProject, type ProjectEntry } from '../../lib/projects';
+import { formatPeriod, withBase } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const all = await getProjects();
+  return all.map((project) => ({
+    params: { slug: project.id },
+    props: { project, next: nextProject(all, project.id) },
+  }));
+}
+
+interface Props {
+  project: ProjectEntry;
+  next: ProjectEntry;
+}
+
+const { project, next } = Astro.props;
+const { data, id } = project;
+const { Content } = await render(project);
+---
+
+<Base title={data.title} description={data.summary}>
+  <article class="project" data-project={id}>
+    <header class="wrap head">
+      <a class="back" href={withBase('/#work')}>
+        All work
+      </a>
+      <h1 transition:name={`title-${id}`}>{data.title}</h1>
+      <p class="summary">{data.summary}</p>
+    </header>
+
+    <div class="wrap">
+      <Media media={data.video} kind="video" variant="page" transitionName={`media-${id}`} />
+    </div>
+
+    <div class="wrap body">
+      <dl class="facts">
+        <div>
+          <dt>Role</dt>
+          <dd>{data.role}</dd>
+        </div>
+        <div>
+          <dt>Where</dt>
+          <dd>{data.org}</dd>
+        </div>
+        <div>
+          <dt>When</dt>
+          <dd>{formatPeriod(data.start, data.end)}</dd>
+        </div>
+        <div>
+          <dt>Stack</dt>
+          <dd>{data.stack.join(', ')}</dd>
+        </div>
+      </dl>
+
+      <div class="prose">
+        <h2>Overview</h2>
+        <Content />
+
+        <h2>Outcomes</h2>
+        <ul class="highlights">
+          {data.highlights.map((h) => (
+            <li>{h}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <section class="wrap diagram" aria-labelledby="diagram-title">
+      <h2 id="diagram-title">System design</h2>
+      <Media media={data.diagram} kind="diagram" variant="page" transitionName={`diagram-${id}`} />
+    </section>
+
+    <nav class="wrap next" aria-label="Next project">
+      <a href={withBase(`/work/${next.id}/`)} data-next>
+        <span class="next-label">Next project</span>
+        <span class="next-title">{next.data.title}</span>
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 5vw, 3.5rem);
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .back {
+    font-size: var(--step--1);
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .back::before {
+    content: '‹ ';
+  }
+
+  h1 {
+    font-size: var(--step-4);
+    letter-spacing: -0.04em;
+    max-width: 14em;
+  }
+
+  .summary {
+    font-size: var(--step-1);
+    color: var(--muted);
+    max-width: var(--measure);
+  }
+
+  .body {
+    display: grid;
+    gap: 3rem;
+    padding-block: clamp(3rem, 7vw, 5rem);
+  }
+
+  @media (min-width: 900px) {
+    .body {
+      grid-template-columns: 1fr 2fr;
+      gap: 5rem;
+    }
+  }
+
+  .facts {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+  }
+
+  .facts dt {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .prose {
+    max-width: var(--measure);
+  }
+
+  .prose h2,
+  .diagram h2 {
+    font-size: var(--step-1);
+    margin-bottom: 1rem;
+  }
+
+  .prose h2:not(:first-child) {
+    margin-top: 3rem;
+  }
+
+  .prose :global(p + p) {
+    margin-top: 1.1em;
+  }
+
+  .highlights {
+    padding-left: 1.1em;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .highlights li::marker {
+    color: var(--muted);
+  }
+
+  .diagram {
+    padding-bottom: clamp(3rem, 7vw, 5rem);
+  }
+
+  .next {
+    border-top: 1px solid var(--rule);
+  }
+
+  .next a {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: clamp(3rem, 7vw, 5rem);
+    text-decoration: none;
+  }
+
+  .next-label {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .next-title {
+    font-size: var(--step-3);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .next a:hover .next-title {
+    color: var(--signal);
+  }
+</style>
