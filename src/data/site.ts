@@ -18,12 +18,12 @@ export const site = {
 export const hero = {
   lines: [
     "Hey! You've found Jen :)",
-    'An embodied AI researcher and robotics engineer in SF.',
-    'Currently building hospital robots at Collaborative Robotics.',
+    'A robotics software engineer in SF.',
+    'Building autonomous mobile robots at Collaborative Robotics.',
     'Before that: AR for surgical robots, and fintech at Mercury.',
   ],
   particles:
-    "Hey! You've found Jen, an embodied AI researcher and robotics engineer in SF, building robots that work beside people. Before that: surgical robots and fintech.",
+    "Hey! You've found Jen, a robotics software engineer in SF, building autonomous mobile robots at Collaborative Robotics. Before that: surgical robots and fintech.",
 } as const;
 
 export interface Role {
