@@ -59,6 +59,13 @@ const more = projects.filter((p) => !p.data.featured);
           and people who need the system to just work. I've also shipped fintech infrastructure at
           Mercury and tested hardware for NASA's DAVINCI mission to Venus.
         </p>
+        <p>
+          Sometimes I venture into different{' '}
+          <a class="quest-link" href={withBase('/sidequests/')}>
+            sidequests
+          </a>{' '}
+          too.
+        </p>
       </div>
 
       <div class="cv">
@@ -206,6 +213,32 @@ const more = projects.filter((p) => !p.data.featured);
     line-height: 1.45;
     letter-spacing: -0.01em;
     max-width: var(--measure);
+  }
+
+  /* Marker swash under the lower half of the word; fills on hover. */
+  .quest-link {
+    text-decoration: none;
+    padding-inline: 0.12em;
+    border-radius: 3px;
+    background-image: linear-gradient(
+      transparent 52%,
+      var(--butter) 52%,
+      var(--butter) 92%,
+      transparent 92%
+    );
+    transition: background-size 0.3s var(--ease);
+    background-size: 100% 100%;
+  }
+
+  .quest-link:hover,
+  .quest-link:focus-visible {
+    color: var(--ink);
+    background-image: linear-gradient(
+      transparent 6%,
+      var(--butter) 6%,
+      var(--butter) 94%,
+      transparent 94%
+    );
   }
 
   .cv h3 {

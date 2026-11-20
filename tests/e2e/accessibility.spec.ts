@@ -2,7 +2,12 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { projectSlugs } from './helpers';
 
-const pages = ['./', ...projectSlugs.map((s) => `./work/${s}/`), './missing-page/'];
+const pages = [
+  './',
+  ...projectSlugs.map((s) => `./work/${s}/`),
+  './sidequests/',
+  './missing-page/',
+];
 
 for (const path of pages) {
   test(`no WCAG 2.2 AA violations on ${path}`, async ({ page }) => {

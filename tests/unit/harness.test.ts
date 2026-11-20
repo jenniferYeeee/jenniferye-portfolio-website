@@ -20,6 +20,7 @@ const REQUIRED_E2E_SPECS = [
   'accessibility.spec.ts',
   'responsive.spec.ts',
   'motion.spec.ts',
+  'sidequests.spec.ts',
 ];
 
 function stages(script: string | undefined): string[] {

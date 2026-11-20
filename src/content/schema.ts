@@ -53,3 +53,26 @@ export const projectSchema = z
 
 export type Project = z.infer<typeof projectSchema>;
 export type Media = z.infer<typeof mediaSchema>;
+
+/** A photo in a sidequest's carousel. Files live under public/media/sidequests/. */
+export const photoSchema = z.object({
+  src: z.string().regex(/^media\/sidequests\/[a-z0-9\-/]+\.(png|jpg|jpeg|webp)$/),
+  /** What the photo shows, for screen readers. */
+  alt: z.string().min(10),
+});
+
+export const sidequestSchema = z.object({
+  title: z.string().min(2).max(60),
+  /** Where it happened, e.g. "NASA DAVINCI mission". */
+  where: z.string().min(2),
+  /** "YYYY-MM" */
+  date: month,
+  /** Lower comes first. Must be unique across sidequests. */
+  order: z.number().int().nonnegative(),
+  /** One or two sentences. */
+  summary: z.string().min(20).max(280),
+  /** Empty = placeholder frames until photos are added. */
+  photos: z.array(photoSchema).max(12),
+});
+
+export type Sidequest = z.infer<typeof sidequestSchema>;

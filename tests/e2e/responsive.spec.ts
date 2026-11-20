@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { projectSlugs } from './helpers';
 
 const widths = [320, 375, 768, 1024, 1440];
-const pages = ['./', ...projectSlugs.map((s) => `./work/${s}/`)];
+const pages = ['./', ...projectSlugs.map((s) => `./work/${s}/`), './sidequests/'];
 
 // Runs on the desktop project only (see playwright.config.ts); the sweep covers phone widths.
 test.describe('layout', () => {

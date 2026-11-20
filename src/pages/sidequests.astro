@@ -1,0 +1,173 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Carousel from '../components/Carousel.astro';
+import { formatYear } from '../lib/format';
+import { skyAt } from '../lib/sky';
+
+const quests = (await getCollection('sidequests')).sort((a, b) => a.data.order - b.data.order);
+const [c0, c1, c2] = skyAt(0);
+---
+
+<Base
+  title="Sidequests"
+  description="Things Jennifer Ye builds, tests and wanders into outside of her day job."
+>
+  <div
+    class="sky"
+    aria-hidden="true"
+    data-sky
+    style={`--sky-0:${c0};--sky-1:${c1};--sky-2:${c2}`}
+  ></div>
+
+  <header class="wrap intro">
+    <h1>Sidequests</h1>
+    <p>Things I build, test and wander into outside of my day job.</p>
+  </header>
+
+  <div class="wrap quests">
+    {quests.map((q) => (
+      <section class="quest" id={q.id} data-quest aria-labelledby={`${q.id}-title`}>
+        <div class="text">
+          <p class="meta">
+            {q.data.where}, {formatYear(q.data.date, q.data.date)}
+          </p>
+          <h2 id={`${q.id}-title`}>{q.data.title}</h2>
+          <p class="summary">{q.data.summary}</p>
+        </div>
+        <Carousel label={q.data.title} photos={q.data.photos} />
+      </section>
+    ))}
+  </div>
+</Base>
+
+<script>
+  import { skyAt } from '../lib/sky';
+
+  function start() {
+    const sky = document.querySelector<HTMLElement>('[data-sky]');
+    if (!sky || sky.dataset.running) return;
+    sky.dataset.running = 'true';
+    const quests = [...document.querySelectorAll<HTMLElement>('[data-quest]')];
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Reveal each row as it enters (unless motion is reduced).
+    if (!reduce && 'IntersectionObserver' in window) {
+      document.documentElement.dataset.reveal = 'on';
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.setAttribute('data-shown', '');
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { rootMargin: '0px 0px -12% 0px' },
+      );
+      quests.forEach((q) => io.observe(q));
+    }
+
+    // Drift the background between palettes as rows pass the middle of the screen.
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      const mid = window.innerHeight / 2;
+      let f = 0;
+      quests.forEach((q, i) => {
+        const r = q.getBoundingClientRect();
+        if (r.top <= mid) f = i + Math.min(1, (mid - r.top) / Math.max(1, r.height));
+      });
+      const pos = Math.max(0, Math.min(quests.length - 1, f - 0.5));
+      const [a, b, c] = skyAt(pos);
+      sky.style.setProperty('--sky-0', a);
+      sky.style.setProperty('--sky-1', b);
+      sky.style.setProperty('--sky-2', c);
+      sky.dataset.position = pos.toFixed(2);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+    const controller = new AbortController();
+    window.addEventListener('scroll', onScroll, { passive: true, signal: controller.signal });
+    document.addEventListener('astro:before-swap', () => controller.abort(), { once: true });
+    paint();
+  }
+
+  document.addEventListener('astro:page-load', start);
+</script>
+
+<style>
+  .sky {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(ellipse 70% 50% at 18% 8%, var(--sky-0), transparent 70%),
+      radial-gradient(ellipse 60% 55% at 85% 78%, var(--sky-1), transparent 70%), var(--sky-2);
+  }
+
+  .intro {
+    padding-block: clamp(4rem, 12vw, 8rem) clamp(2rem, 6vw, 4rem);
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  h1 {
+    font-size: var(--step-4);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .intro p {
+    font-size: var(--step-1);
+    color: var(--muted);
+    max-width: var(--measure);
+  }
+
+  .quests {
+    display: grid;
+    gap: clamp(5rem, 12vw, 9rem);
+    padding-bottom: clamp(5rem, 12vw, 9rem);
+  }
+
+  .quest {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .text {
+    display: grid;
+    gap: 0.6rem;
+    max-width: var(--measure);
+  }
+
+  .meta {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  h2 {
+    font-size: var(--step-3);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+  }
+
+  .summary {
+    color: #3b3732;
+  }
+
+  :global(html[data-reveal='on']) .quest {
+    opacity: 0;
+    transform: translateY(3rem);
+    transition:
+      opacity 0.8s ease,
+      transform 0.9s var(--ease);
+  }
+
+  :global(html[data-reveal='on']) .quest[data-shown] {
+    opacity: 1;
+    transform: none;
+  }
+</style>

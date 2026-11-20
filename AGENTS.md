@@ -51,6 +51,19 @@ video:
 Keep videos H.264 MP4 under ~15 MB; `check:dist` fails any file over Cloudflare's 25 MiB limit (`ffmpeg -i in.mov -vcodec libx264 -crf 26 -preset veryfast -an out.mp4`).
 `npm run media:report` lists what's still a placeholder.
 
+**Add a sidequest.** Create `src/content/sidequests/<kebab-slug>.md` (fields in
+`sidequestSchema`). Put photos in `public/media/sidequests/<slug>/` and list them:
+
+```yaml
+photos:
+  - src: media/sidequests/<slug>/01.jpg # no leading slash
+    alt: What the photo shows, in a sentence.
+```
+
+With no photos, the carousel shows three "Photo coming soon" frames. Keep each photo
+under ~1 MB (export at ~2000px wide, JPEG/WebP). The page background drifts between the
+light palettes in `src/lib/sky.ts` as you scroll from one sidequest to the next.
+
 **Change copy.** The hero lines and particle sentence are `hero` in `src/data/site.ts`
 (unit tests cap each typed line at 64 characters; e2e checks each fits on one line from
 768px up). Bio and contact live in `src/pages/index.astro` and `src/data/site.ts`.
@@ -58,6 +71,8 @@ Keep videos H.264 MP4 under ~15 MB; `check:dist` fails any file over Cloudflare'
 ## Design rules
 
 - Palette and type scale are CSS variables in `src/styles/global.css`. Don't add colors.
+  `--butter` is reserved for the marker-swash sidequests link in About; the sidequests page
+  background palettes live in `src/lib/sky.ts`.
 - One typeface (Inter). Sentence case. No all-caps labels. Warm, low-contrast neutrals.
 - The hero is the one motion moment: the intro sentence's letters laid out in reading
   order, bobbing and drifting in and out of focus (sharp near the cursor), with the intro

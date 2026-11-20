@@ -1,0 +1,184 @@
+---
+import type { Sidequest } from '../content/schema';
+import { withBase } from '../lib/format';
+
+interface Props {
+  label: string;
+  photos: Sidequest['photos'];
+}
+
+const { label, photos } = Astro.props;
+/** Until photos are added, show three labelled frames so the layout reads as a carousel. */
+const PLACEHOLDERS = 3;
+const slides = photos.length
+  ? photos.map((p) => ({ src: withBase(p.src), alt: p.alt }))
+  : Array.from({ length: PLACEHOLDERS }, () => null);
+---
+
+<div
+  class="carousel"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label={label}
+  data-carousel
+>
+  <ul class="track" data-track tabindex="0" aria-label={`${label} photos`}>
+    {slides.map((s, i) => (
+      <li
+        class="slide"
+        aria-roledescription="slide"
+        aria-label={`${i + 1} of ${slides.length}`}
+        data-slide
+      >
+        {s ? (
+          <img src={s.src} alt={s.alt} loading="lazy" decoding="async" />
+        ) : (
+          <div class="placeholder" role="img" aria-label="Photo coming soon">
+            <span>Photo coming soon</span>
+          </div>
+        )}
+      </li>
+    ))}
+  </ul>
+  {slides.length > 1 && (
+    <div class="controls">
+      <button type="button" class="nav" data-prev aria-label="Previous photo" disabled>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.6" />
+        </svg>
+      </button>
+      <button type="button" class="nav" data-next aria-label="Next photo">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="m6 3 5 5-5 5" stroke="currentColor" stroke-width="1.6" />
+        </svg>
+      </button>
+    </div>
+  )}
+</div>
+
+<script>
+  function setup() {
+    for (const root of document.querySelectorAll<HTMLElement>('[data-carousel]')) {
+      if (root.dataset.ready) continue;
+      root.dataset.ready = 'true';
+      const track = root.querySelector<HTMLElement>('[data-track]');
+      const prev = root.querySelector<HTMLButtonElement>('[data-prev]');
+      const next = root.querySelector<HTMLButtonElement>('[data-next]');
+      if (!track || !prev || !next) continue;
+
+      const step = () => {
+        const slide = track.querySelector<HTMLElement>('[data-slide]');
+        const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+        return (slide?.offsetWidth ?? track.clientWidth) + gap;
+      };
+      const update = () => {
+        const max = track.scrollWidth - track.clientWidth - 2;
+        prev.disabled = track.scrollLeft <= 2;
+        next.disabled = track.scrollLeft >= max;
+      };
+      prev.addEventListener('click', () => track.scrollBy({ left: -step() }));
+      next.addEventListener('click', () => track.scrollBy({ left: step() }));
+      track.addEventListener('scroll', update, { passive: true });
+      update();
+    }
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>
+
+<style>
+  .carousel {
+    position: relative;
+  }
+
+  .track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(78%, 56rem);
+    column-gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    border-radius: 22px;
+  }
+
+  .track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .slide {
+    scroll-snap-align: start;
+    aspect-ratio: 16 / 10;
+    border-radius: 22px;
+    overflow: hidden;
+  }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 1.25rem 1.4rem;
+    box-sizing: border-box;
+    background:
+      radial-gradient(circle at 50% 45%, rgb(255 255 255 / 0.75), transparent 55%),
+      rgb(255 255 255 / 0.4);
+    border: 1px solid rgb(255 255 255 / 0.6);
+    border-radius: 22px;
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+
+  .controls {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+
+  .nav {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgb(31 29 26 / 0.15);
+    background: rgb(255 255 255 / 0.55);
+    color: var(--ink);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition:
+      background-color 0.2s,
+      opacity 0.2s;
+  }
+
+  .nav:hover:not(:disabled) {
+    background: rgb(255 255 255 / 0.9);
+  }
+
+  .nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  @media (max-width: 640px) {
+    .track {
+      grid-auto-columns: 88%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      scroll-behavior: auto;
+    }
+  }
+</style>
