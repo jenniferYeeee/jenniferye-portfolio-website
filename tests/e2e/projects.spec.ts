@@ -20,10 +20,13 @@ for (const slug of projectSlugs) {
     const video = page.locator('[data-media="video"]');
     const diagram = page.locator('[data-media="diagram"]');
     await expect(video).toBeVisible();
-    await expect(diagram).toBeVisible();
+    // A project can leave its diagram out on purpose; then there is no System design section.
+    const hasDiagram = (await page.locator('#diagram-title').count()) > 0;
+    if (hasDiagram) await expect(diagram).toBeVisible();
+    else await expect(diagram).toHaveCount(0);
 
     // Each media slot is either a real asset or the labelled placeholder, never empty.
-    for (const slot of [video, diagram]) {
+    for (const slot of hasDiagram ? [video, diagram] : [video]) {
       const status = await slot.getAttribute('data-status');
       if (status === 'pending') {
         await expect(slot.getByRole('img')).toHaveAccessibleName(/coming soon/);

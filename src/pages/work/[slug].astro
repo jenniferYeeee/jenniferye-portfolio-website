@@ -88,10 +88,24 @@ const { Content } = await render(project);
       </section>
     ))}
 
-    <section class="wrap diagram" aria-labelledby="diagram-title">
-      <h2 id="diagram-title">System design</h2>
-      <Media media={data.diagram} kind="diagram" variant="page" transitionName={`diagram-${id}`} />
-    </section>
+    {data.diagram.status !== 'none' && (
+      <section class="wrap diagram" aria-labelledby="diagram-title">
+        <div class="report-head">
+          <h2 id="diagram-title">System design</h2>
+          {data.diagram.status === 'ready' && (
+            <a href={withBase(data.diagram.src)} target="_blank" rel="noopener">
+              Open full size
+            </a>
+          )}
+        </div>
+        <Media
+          media={data.diagram}
+          kind="diagram"
+          variant="page"
+          transitionName={`diagram-${id}`}
+        />
+      </section>
+    )}
 
     {data.report && (
       <section class="wrap report" aria-labelledby="report-title" data-report>
@@ -181,6 +195,7 @@ const { Content } = await render(project);
 
   .prose {
     max-width: var(--measure);
+    min-width: 0; /* lets wide tables and formulas scroll instead of widening the page */
   }
 
   .prose h2,
@@ -197,6 +212,66 @@ const { Content } = await render(project);
 
   .prose :global(p + p) {
     margin-top: 1.1em;
+  }
+
+  /* Long-form write-ups in a project's body: subsections, lists, tables, formulas. */
+  .prose :global(h3) {
+    font-size: var(--step-0);
+    font-weight: 600;
+    margin: 2.25rem 0 0.75rem;
+  }
+
+  .prose :global(:is(ul, ol)) {
+    padding-left: 1.2em;
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 0.9em;
+  }
+
+  .prose :global(:is(ul, ol) + p),
+  .prose :global(:is(table, pre) + p) {
+    margin-top: 1.1em;
+  }
+
+  .prose :global(.table-scroll) {
+    overflow-x: auto;
+    margin-top: 1rem;
+  }
+
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+    margin-top: 1rem;
+  }
+
+  .prose :global(:is(th, td)) {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.55rem 0.75rem 0.55rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .prose :global(th) {
+    font-weight: 600;
+  }
+
+  .prose :global(pre) {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--panel) !important;
+    color: var(--ink) !important;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .prose :global(code) {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.9em;
   }
 
   .highlights {

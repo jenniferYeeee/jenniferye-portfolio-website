@@ -28,6 +28,12 @@ export const mediaSchema = z.discriminatedUnion('status', [
   }),
 ]);
 
+/**
+ * A project's diagram can also be left out on purpose ("none"): the page then has no
+ * System design section at all, instead of a "coming soon" placeholder.
+ */
+export const diagramSchema = z.union([mediaSchema, z.object({ status: z.literal('none') })]);
+
 /** "YYYY-MM" */
 const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 
@@ -71,7 +77,7 @@ export const projectSchema = z
     /** Concrete outcomes, one sentence each. */
     highlights: z.array(z.string().min(10)).min(1).max(5),
     video: mediaSchema,
-    diagram: mediaSchema,
+    diagram: diagramSchema,
     /** More clips for the project page, below the overview. */
     extras: z.array(extraVideoSchema).max(4).default([]),
     /** Optional write-up, embedded as a scrollable PDF on the project page. */

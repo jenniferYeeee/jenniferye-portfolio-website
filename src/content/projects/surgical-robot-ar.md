@@ -28,7 +28,9 @@ report:
   src: media/surgical-robot-ar/final-report.pdf
   title: 'Final report: Augmented Reality-Assisted Robotic Arm Alignment for Precision Surgical Procedures'
 diagram:
-  status: pending
+  status: ready
+  src: media/surgical-robot-ar/diagram.svg
+  alt: "System diagram. The HoloLens 2 streams RGB and depth frames over Wi-Fi to a Windows GPU host using hl2ss. On the first frame, YOLOv8 finds the Micromate and SAM cuts a precise mask. FoundationPose, given the arm's CAD mesh from an iPhone scan and the camera intrinsics, registers the first-frame pose and then tracks every following frame. The resulting 6-DoF pose goes back to the headset, where a Unity MRTK app draws a phantom arm and an arrow to the target position, turning green within 5 cm."
 ---
 
 Before a procedure, a surgical robot has to be placed precisely relative to the patient and the table. That alignment is usually done by eye or with dedicated optical trackers that cost thousands per robot.

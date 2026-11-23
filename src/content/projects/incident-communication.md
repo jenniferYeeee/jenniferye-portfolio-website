@@ -19,7 +19,9 @@ video:
   preview: media/incident-communication/preview.mp4
   alt: An admin writes and schedules a customer alert banner and submits it for review, then a second admin compares the proposed changes and approves it.
 diagram:
-  status: pending
+  status: ready
+  src: media/incident-communication/diagram.svg
+  alt: "System diagram. An author creates or edits an alert in the admin dashboard: banner, call to action, schedule and CSV audience. The Alerts API validates it, shows a live preview, keeps every version and audit history, and saves it as a draft. Alerts move from draft to under review, where Slack asks reviewers to approve. A second admin compares current and proposed versions and approves, making it active; authors can't approve their own alerts. Active alerts are published to the customer app for the targeted organizations and expire at their scheduled end time."
 ---
 
 When something goes wrong at a bank, customers need to hear about it quickly and accurately. Mercury relied on a third-party tool for this; I designed and shipped its replacement end to end: backend APIs, data model, and admin UI.

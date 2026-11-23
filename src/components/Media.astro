@@ -96,6 +96,17 @@ const isVideoFile = media.status === 'ready' && /\.(mp4|webm)$/.test(media.src);
     padding: 4%;
   }
 
+  /* A finished diagram takes its own shape instead of the placeholder's 16:10 frame. */
+  .media--diagram[data-status='ready'] {
+    aspect-ratio: auto;
+  }
+
+  .media--diagram[data-status='ready'] img {
+    height: auto;
+    padding: 0;
+    border-radius: inherit;
+  }
+
   /* Placeholder: a fine coordinate grid with a frame triad, a nod to pose estimation. */
   .placeholder {
     position: absolute;
