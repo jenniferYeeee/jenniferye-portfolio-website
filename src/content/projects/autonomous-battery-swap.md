@@ -16,6 +16,7 @@ video:
   status: ready
   src: media/autonomous-battery-swap/demo.mp4
   poster: media/autonomous-battery-swap/poster.jpg
+  preview: media/autonomous-battery-swap/preview.mp4
   alt: Proxie drives up to its battery station, swaps in a fresh battery on its own, and heads back to work.
 diagram:
   status: pending

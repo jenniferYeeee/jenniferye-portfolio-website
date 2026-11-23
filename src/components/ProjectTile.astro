@@ -9,6 +9,7 @@ interface Props {
 
 const { project } = Astro.props;
 const { data, id } = project;
+const moving = data.video.status === 'ready' && /\.(mp4|webm)$/.test(data.video.src);
 ---
 
 <article class="tile" data-project={id}>
@@ -20,9 +21,136 @@ const { data, id } = project;
       <p class="meta">{data.org}</p>
     </div>
   </a>
+  {moving && (
+    <button
+      type="button"
+      class="pause"
+      data-pause
+      aria-label={`Pause ${data.title} preview`}
+      hidden
+    >
+      <svg class="icon-pause" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+        <rect x="2" y="1.5" width="2.6" height="9" rx="0.6" />
+        <rect x="7.4" y="1.5" width="2.6" height="9" rx="0.6" />
+      </svg>
+      <svg class="icon-play" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M3 1.6v8.8a.5.5 0 0 0 .76.43l7-4.4a.5.5 0 0 0 0-.86l-7-4.4A.5.5 0 0 0 3 1.6Z" />
+      </svg>
+    </button>
+  )}
 </article>
 
+<script>
+  /**
+   * Tile previews play muted and looped while at least half on screen, and pause off screen
+   * (saves data and battery). Each has a pause button (WCAG 2.2.2). With reduced motion,
+   * nothing plays and the poster stays.
+   */
+  function setup() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const tiles = [...document.querySelectorAll<HTMLElement>('article.tile')];
+    if (reduce || !('IntersectionObserver' in window)) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const tile = e.target as HTMLElement;
+          const video = tile.querySelector<HTMLVideoElement>('video[data-autoplay]');
+          if (!video) continue;
+          if (e.isIntersecting && !tile.dataset.userPaused) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        }
+      },
+      { threshold: 0.5 },
+    );
+
+    for (const tile of tiles) {
+      const video = tile.querySelector<HTMLVideoElement>('video[data-autoplay]');
+      const button = tile.querySelector<HTMLButtonElement>('[data-pause]');
+      if (!video || !button || tile.dataset.autoplayReady) continue;
+      tile.dataset.autoplayReady = 'true';
+      const title = tile.querySelector('h3')?.textContent ?? 'video';
+      button.hidden = false;
+      const sync = () => {
+        const paused = Boolean(tile.dataset.userPaused);
+        button.setAttribute('aria-label', `${paused ? 'Play' : 'Pause'} ${title} preview`);
+        button.dataset.state = paused ? 'paused' : 'playing';
+      };
+      button.addEventListener('click', () => {
+        if (tile.dataset.userPaused) {
+          delete tile.dataset.userPaused;
+          video.play().catch(() => {});
+        } else {
+          tile.dataset.userPaused = 'true';
+          video.pause();
+        }
+        sync();
+      });
+      sync();
+      io.observe(tile);
+    }
+    document.addEventListener('astro:before-swap', () => io.disconnect(), { once: true });
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>
+
 <style>
+  .tile {
+    position: relative;
+  }
+
+  .pause {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgb(255 255 255 / 0.5);
+    background: rgb(31 29 26 / 0.45);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity 0.2s,
+      background-color 0.2s;
+    backdrop-filter: blur(6px);
+  }
+
+  .pause[hidden] {
+    display: none;
+  }
+
+  .pause svg {
+    fill: currentColor;
+  }
+
+  .tile:hover .pause,
+  .pause:focus-visible,
+  .pause[data-state='paused'] {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .pause {
+      opacity: 1;
+    }
+  }
+
+  .pause:hover {
+    background: rgb(31 29 26 / 0.65);
+  }
+
+  .pause[data-state='paused'] .icon-pause,
+  .pause:not([data-state='paused']) .icon-play {
+    display: none;
+  }
+
   .link {
     display: grid;
     gap: 1.25rem;

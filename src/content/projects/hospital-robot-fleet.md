@@ -16,6 +16,7 @@ video:
   status: ready
   src: media/hospital-robot-fleet/demo.mp4
   poster: media/hospital-robot-fleet/poster.jpg
+  preview: media/hospital-robot-fleet/preview.mp4
   alt: A Proxie robot pulling a supply cart down a Mayo Clinic hallway as the doors ahead open for it.
 diagram:
   status: pending

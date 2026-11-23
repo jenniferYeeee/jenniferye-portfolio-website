@@ -122,3 +122,25 @@ test('project tile and page share a view-transition name', async ({ page }) => {
     .evaluate((el) => getComputedStyle(el).viewTransitionName);
   expect(pageName).toBe(tileName);
 });
+
+test('home tile previews autoplay muted in view and can be paused', async ({ page }) => {
+  await page.goto('./');
+  const tile = page.locator('#work article', { has: page.locator('video[data-autoplay]') }).first();
+  await tile.scrollIntoViewIfNeeded();
+  const video = tile.locator('video[data-autoplay]');
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused && v.muted)).toBe(true);
+  const button = tile.getByRole('button', { name: /^Pause .* preview$/ });
+  await button.click();
+  await expect(tile.getByRole('button', { name: /^Play .* preview$/ })).toBeVisible();
+  expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+});
+
+test('home tile previews stay still with reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  const tile = page.locator('#work article', { has: page.locator('video[data-autoplay]') }).first();
+  await tile.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
+  expect(await tile.locator('video').evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+  await expect(tile.locator('[data-pause]')).toBeHidden();
+});

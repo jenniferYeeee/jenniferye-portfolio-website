@@ -16,6 +16,7 @@ video:
   status: ready
   src: media/surgical-robot-ar/demo.mp4
   poster: media/surgical-robot-ar/poster.jpg
+  preview: media/surgical-robot-ar/preview.mp4
   alt: The HoloLens 2 view while aligning the robot arm, with a virtual tracker, a target sphere and an arrow guiding the arm into place.
 extras:
   - title: Tracking the arm with FoundationPose

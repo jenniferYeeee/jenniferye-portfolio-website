@@ -18,6 +18,11 @@ export const mediaSchema = z.discriminatedUnion('status', [
       .string()
       .regex(/^media\/[a-z0-9\-/]+\.(png|jpg|jpeg|webp)$/)
       .optional(),
+    /** Optional short, small clip (a few seconds, ~1 MB) that loops on the home tile. */
+    preview: z
+      .string()
+      .regex(/^media\/[a-z0-9\-/]+\.(mp4|webm)$/)
+      .optional(),
     /** Describes what the media shows, for screen readers. */
     alt: z.string().min(10),
   }),

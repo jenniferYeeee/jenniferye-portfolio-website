@@ -46,13 +46,17 @@ const isVideoFile = media.status === 'ready' && /\.(mp4|webm)$/.test(media.src);
       />
     </video>
   ) : isVideoFile ? (
-    media.poster ? (
-      <img src={withBase(media.poster)} alt={media.alt} loading="lazy" decoding="async" />
-    ) : (
-      <video muted playsinline preload="metadata" aria-label={media.alt}>
-        <source src={withBase(media.src)} />
-      </video>
-    )
+    <video
+      muted
+      loop
+      playsinline
+      preload="none"
+      poster={media.poster ? withBase(media.poster) : undefined}
+      aria-hidden="true"
+      data-autoplay
+    >
+      <source src={withBase(media.preview ?? media.src)} type="video/mp4" />
+    </video>
   ) : (
     <img src={withBase(media.src)} alt={media.alt} loading="lazy" decoding="async" />
   )}
