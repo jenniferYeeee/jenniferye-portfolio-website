@@ -123,31 +123,16 @@ test('project tile and page share a view-transition name', async ({ page }) => {
   expect(pageName).toBe(tileName);
 });
 
-test('the battery swap tile autoplays muted in view and can be paused', async ({ page }) => {
+test('every tile preview plays only while hovered @desktop', async ({ page }) => {
   await page.goto('./');
-  const tile = page.locator('#work article', {
-    has: page.locator('video[data-autoplay="scroll"]'),
-  });
-  await expect(tile).toHaveCount(1);
+  const tiles = page.locator('#work article', { has: page.locator('video[data-hover-play]') });
+  await expect(tiles).toHaveCount(4);
+  const tile = tiles.first();
   await expect(tile).toHaveAttribute('data-project', 'autonomous-battery-swap');
-  await tile.scrollIntoViewIfNeeded();
-  const video = tile.locator('video');
-  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused && v.muted)).toBe(true);
-  await tile.getByRole('button', { name: /^Pause .* preview$/ }).click();
-  await expect(tile.getByRole('button', { name: /^Play .* preview$/ })).toBeVisible();
-  expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
-});
-
-test('hover tiles play only while hovered @desktop', async ({ page }) => {
-  await page.goto('./');
-  const tile = page
-    .locator('#work article', { has: page.locator('video[data-autoplay="hover"]') })
-    .first();
   await tile.scrollIntoViewIfNeeded();
   const video = tile.locator('video');
   await page.waitForTimeout(400);
   expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
-  await expect(tile.locator('[data-pause]')).toHaveCount(0);
   await tile.locator('figure').hover();
   await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused)).toBe(true);
   await page.mouse.move(0, 0);
@@ -166,12 +151,14 @@ test('project pages loop the demo muted, but not with reduced motion', async ({ 
   expect(await demo.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
 });
 
-test('home tile previews stay still with reduced motion', async ({ page }) => {
+test('tile previews stay still on hover with reduced motion @desktop', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
-  const tile = page.locator('#work article', { has: page.locator('video[data-autoplay]') }).first();
+  const tile = page
+    .locator('#work article', { has: page.locator('video[data-hover-play]') })
+    .first();
   await tile.scrollIntoViewIfNeeded();
+  await tile.locator('figure').hover();
   await page.waitForTimeout(500);
   expect(await tile.locator('video').evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
-  await expect(tile.locator('[data-pause]')).toBeHidden();
 });

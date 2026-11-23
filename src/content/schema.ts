@@ -18,17 +18,11 @@ export const mediaSchema = z.discriminatedUnion('status', [
       .string()
       .regex(/^media\/[a-z0-9\-/]+\.(png|jpg|jpeg|webp)$/)
       .optional(),
-    /** Optional short, small clip (a few seconds, ~1 MB) that loops on the home tile. */
+    /** Optional short, small clip (a few seconds, ~1 MB) that plays on the home tile while hovered. */
     preview: z
       .string()
       .regex(/^media\/[a-z0-9\-/]+\.(mp4|webm)$/)
       .optional(),
-    /**
-     * How the home tile plays the clip: "scroll" loops it while on screen (with a pause
-     * button); "hover" plays it only while the pointer is over the tile. Project pages
-     * always loop the video muted.
-     */
-    tilePlay: z.enum(['scroll', 'hover']).default('hover'),
     /** Describes what the media shows, for screen readers. */
     alt: z.string().min(10),
   }),

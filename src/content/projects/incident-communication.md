@@ -1,5 +1,5 @@
 ---
-title: Customer incident communication
+title: Rapid Product Alerts
 summary: An in-house system for alerting Mercury customers during incidents, replacing a $600K-a-year vendor.
 org: Mercury
 role: Software Engineer
@@ -13,7 +13,11 @@ highlights:
   - Cut the time to create and send an incident alert by about 80% with a guided admin workflow.
   - Enforced two-person approval, audit history, and automatic expiry for messages reaching 100,000+ organizations.
 video:
-  status: pending
+  status: ready
+  src: media/incident-communication/demo.mp4
+  poster: media/incident-communication/poster.jpg
+  preview: media/incident-communication/preview.mp4
+  alt: An admin writes and schedules a customer alert banner and submits it for review, then a second admin compares the proposed changes and approves it.
 diagram:
   status: pending
 ---
