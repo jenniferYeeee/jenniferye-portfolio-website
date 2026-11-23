@@ -13,3 +13,5 @@ npm ci
 npm run dev       # http://localhost:4321/
 npm run verify    # full suite
 ```
+
+Visitor analytics: Cloudflare Web Analytics, enabled on the `jenye` Pages project (Metrics tab). Cloudflare injects its beacon at deploy time, so there is no analytics code in this repo. No cookies, so no consent banner.
