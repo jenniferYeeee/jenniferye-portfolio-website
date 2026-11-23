@@ -70,10 +70,40 @@ const { Content } = await render(project);
       </div>
     </div>
 
+    {data.extras.map((x, i) => (
+      <section class="wrap extra" aria-labelledby={`extra-${i}-title`} data-extra>
+        <h2 id={`extra-${i}-title`}>{x.title}</h2>
+        <figure>
+          <video
+            controls
+            playsinline
+            preload="metadata"
+            poster={x.poster ? withBase(x.poster) : undefined}
+            aria-label={x.alt}
+          >
+            <source src={withBase(x.src)} type="video/mp4" />
+          </video>
+          <figcaption>{x.caption}</figcaption>
+        </figure>
+      </section>
+    ))}
+
     <section class="wrap diagram" aria-labelledby="diagram-title">
       <h2 id="diagram-title">System design</h2>
       <Media media={data.diagram} kind="diagram" variant="page" transitionName={`diagram-${id}`} />
     </section>
+
+    {data.report && (
+      <section class="wrap report" aria-labelledby="report-title" data-report>
+        <div class="report-head">
+          <h2 id="report-title">Final report</h2>
+          <a href={withBase(data.report.src)} target="_blank" rel="noopener">
+            Open in a new tab
+          </a>
+        </div>
+        <iframe src={withBase(data.report.src)} title={data.report.title} loading="lazy"></iframe>
+      </section>
+    )}
 
     <nav class="wrap next" aria-label="Next project">
       <a href={withBase(`/work/${next.id}/`)} data-next>
@@ -142,6 +172,8 @@ const { Content } = await render(project);
   }
 
   .prose h2,
+  .extra h2,
+  .report h2,
   .diagram h2 {
     font-size: var(--step-1);
     margin-bottom: 1rem;
@@ -165,8 +197,58 @@ const { Content } = await render(project);
     color: var(--muted);
   }
 
-  .diagram {
+  .diagram,
+  .extra,
+  .report {
     padding-bottom: clamp(3rem, 7vw, 5rem);
+  }
+
+  .extra figure {
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .extra video {
+    display: block;
+    width: 100%;
+    max-height: 80vh;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    background: var(--panel);
+    border-radius: var(--radius-lg);
+  }
+
+  .extra figcaption {
+    color: var(--muted);
+    max-width: var(--measure);
+  }
+
+  .report-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .report-head h2 {
+    margin-bottom: 0;
+  }
+
+  .report-head a {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  .report iframe {
+    display: block;
+    width: 100%;
+    height: min(85vh, 60rem);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    background: var(--paper);
   }
 
   .next {

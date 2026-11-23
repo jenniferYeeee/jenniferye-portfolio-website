@@ -31,8 +31,9 @@ describe('sidequest content', () => {
 
   it('points every photo at a file in public/', () => {
     for (const q of quests) {
-      for (const p of q.data.photos as { src: string }[]) {
+      for (const p of q.data.photos as { src: string; poster?: string }[]) {
         expect(existsSync(join('public', p.src)), `${q.id}: public/${p.src}`).toBe(true);
+        if (p.poster) expect(existsSync(join('public', p.poster)), `${q.id}: poster`).toBe(true);
       }
     }
   });

@@ -1,7 +1,7 @@
 ---
 import Media from './Media.astro';
 import type { ProjectEntry } from '../lib/projects';
-import { formatYear, withBase } from '../lib/format';
+import { withBase } from '../lib/format';
 
 interface Props {
   project: ProjectEntry;
@@ -17,9 +17,7 @@ const { data, id } = project;
     <div class="text">
       <h3 transition:name={`title-${id}`}>{data.title}</h3>
       <p class="summary">{data.summary}</p>
-      <p class="meta">
-        {data.org}, {formatYear(data.start, data.end)}
-      </p>
+      <p class="meta">{data.org}</p>
     </div>
   </a>
 </article>

@@ -49,6 +49,16 @@ describe('project content', () => {
         if (m.poster)
           expect(existsSync(join('public', m.poster)), `${p.id}.${key}.poster`).toBe(true);
       }
+      for (const x of (p.data.extras ?? []) as { src: string; poster?: string }[]) {
+        expect(existsSync(join('public', x.src)), `${p.id}.extras: public/${x.src}`).toBe(true);
+        if (x.poster)
+          expect(existsSync(join('public', x.poster)), `${p.id}.extras.poster`).toBe(true);
+      }
+      const report = p.data.report as { src: string } | undefined;
+      if (report)
+        expect(existsSync(join('public', report.src)), `${p.id}.report: public/${report.src}`).toBe(
+          true,
+        );
     }
   });
 });

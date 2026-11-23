@@ -1,25 +1,28 @@
 ---
-title: Hospital robot fleet
-summary: Dispatch, charging, and door control for a fleet of collaborative robots working in hospital hallways.
+title: Door API integration in Mayo Clinic
+summary: Letting hospital robots open Mayo Clinic's doors on their own, through the building's door API.
 org: Collaborative Robotics
 role: Robotics Software Engineer
 start: '2026-01'
 end: null
 order: 2
 featured: true
-stack: [Java, Spring Boot, OAuth, mTLS, Infrastructure as code, Simulation]
+stack: [Java, Spring Boot, OAuth, mTLS, Infrastructure as code]
 highlights:
-  - Cut average mission time by 5 minutes by replacing random robot assignment with proximity-based dispatch.
-  - Removed people from the charging loop with autonomous battery swapping and simulation-tuned fleet scheduling.
   - Let robots open hospital doors on their own through an event-driven service with vendor-agnostic adapters.
+  - Secured every door call with OAuth and mTLS, with infrastructure defined as code.
+  - Made door requests fault-tolerant, with retries that survive flaky building networks.
 video:
-  status: pending
+  status: ready
+  src: media/hospital-robot-fleet/demo.mp4
+  poster: media/hospital-robot-fleet/poster.jpg
+  alt: A Proxie robot pulling a supply cart down a Mayo Clinic hallway as the doors ahead open for it.
 diagram:
   status: pending
 ---
 
-Robots moving supplies through a hospital spend much of their day waiting: for an assignment, for a charge, for someone to open a door. This work removes those waits.
+Robots moving supplies through a hospital spend a lot of time waiting for someone to open a door. At Mayo Clinic, many of those doors can be controlled through the building's door API, so the robot can open them itself.
 
-Dispatch now assigns each mission to the nearest robot that can take it, subject to constraints like battery and payload, instead of picking one at random. Charging is handled by autonomous battery swaps, with scheduling heuristics tuned against a fleet simulation before they ship.
+I built the event-driven Spring Boot service that connects the robots to the hospital's door system. When a robot's route reaches a door, the service asks the door to open and confirms it has before the robot drives through.
 
-For doors, an event-driven Spring Boot service talks to each hospital's door system through a vendor-agnostic adapter layer, with OAuth and mTLS on every call and retries that tolerate flaky building networks.
+Each door vendor sits behind its own adapter, so supporting a new building means writing an adapter, not changing the service. Every call uses OAuth and mTLS, the infrastructure is defined as code, and retries are built to tolerate unreliable building networks.

@@ -26,6 +26,28 @@ export const mediaSchema = z.discriminatedUnion('status', [
 /** "YYYY-MM" */
 const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 
+/** An extra clip shown further down a project page, with a caption. */
+export const extraVideoSchema = z.object({
+  src: z.string().regex(/^media\/[a-z0-9\-/]+\.(mp4|webm)$/),
+  poster: z
+    .string()
+    .regex(/^media\/[a-z0-9\-/]+\.(png|jpg|jpeg|webp)$/)
+    .optional(),
+  /** Section heading above the clip. */
+  title: z.string().min(2).max(60),
+  /** One or two sentences under the clip. */
+  caption: z.string().min(20).max(400),
+  /** Describes what the video shows, for screen readers. */
+  alt: z.string().min(10),
+});
+
+/** A PDF shown in a scrollable viewer on the project page. */
+export const reportSchema = z.object({
+  src: z.string().regex(/^media\/[a-z0-9\-/]+\.pdf$/),
+  /** Names the document for screen readers and the open-in-new-tab link. */
+  title: z.string().min(5).max(120),
+});
+
 export const projectSchema = z
   .object({
     title: z.string().min(2).max(48),
@@ -45,6 +67,10 @@ export const projectSchema = z
     highlights: z.array(z.string().min(10)).min(1).max(5),
     video: mediaSchema,
     diagram: mediaSchema,
+    /** More clips for the project page, below the overview. */
+    extras: z.array(extraVideoSchema).max(4).default([]),
+    /** Optional write-up, embedded as a scrollable PDF on the project page. */
+    report: reportSchema.optional(),
   })
   .refine((p) => p.end === null || p.end >= p.start, {
     message: 'end must not be before start',
@@ -54,10 +80,17 @@ export const projectSchema = z
 export type Project = z.infer<typeof projectSchema>;
 export type Media = z.infer<typeof mediaSchema>;
 
-/** A photo in a sidequest's carousel. Files live under public/media/sidequests/. */
+/**
+ * A photo or video clip in a sidequest's carousel. Files live under public/media/sidequests/.
+ * Videos play with controls; give them a poster so the frame isn't blank before playing.
+ */
 export const photoSchema = z.object({
-  src: z.string().regex(/^media\/sidequests\/[a-z0-9\-/]+\.(png|jpg|jpeg|webp)$/),
-  /** What the photo shows, for screen readers. */
+  src: z.string().regex(/^media\/sidequests\/[a-z0-9\-/]+\.(png|jpg|jpeg|webp|mp4)$/),
+  poster: z
+    .string()
+    .regex(/^media\/sidequests\/[a-z0-9\-/]+\.(png|jpg|jpeg|webp)$/)
+    .optional(),
+  /** What the photo or clip shows, for screen readers. */
   alt: z.string().min(10),
 });
 

@@ -40,7 +40,11 @@ test('renders one row per sidequest, each with a carousel', async ({ page }) => 
 test('carousel buttons move between photos and disable at the ends', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./sidequests/');
-  const carousel = page.locator('[data-carousel]').first();
+  // A carousel with more than one slide (single-clip sidequests have no buttons).
+  const carousel = page
+    .locator('[data-carousel]')
+    .filter({ has: page.locator('[data-next]') })
+    .first();
   const track = carousel.locator('[data-track]');
   const prev = carousel.getByRole('button', { name: 'Previous photo' });
   const next = carousel.getByRole('button', { name: 'Next photo' });

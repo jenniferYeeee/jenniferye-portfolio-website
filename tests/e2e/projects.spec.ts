@@ -65,3 +65,18 @@ test('next links cycle through every project', async ({ page }) => {
   }
   expect(seen.size).toBe(projectSlugs.length);
 });
+
+test('project extras and report render when present', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('./work/surgical-robot-ar/');
+  const extra = page.locator('[data-extra]');
+  await expect(extra.locator('video')).toHaveCount(1);
+  await expect(extra.locator('figcaption')).not.toBeEmpty();
+  const report = page.locator('[data-report]');
+  await expect(report.locator('iframe')).toHaveAttribute('src', /\.pdf$/);
+  await expect(report.getByRole('link', { name: 'Open in a new tab' })).toHaveAttribute(
+    'href',
+    /\.pdf$/,
+  );
+  expect(errors).toEqual([]);
+});
