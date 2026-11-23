@@ -123,16 +123,47 @@ test('project tile and page share a view-transition name', async ({ page }) => {
   expect(pageName).toBe(tileName);
 });
 
-test('home tile previews autoplay muted in view and can be paused', async ({ page }) => {
+test('the battery swap tile autoplays muted in view and can be paused', async ({ page }) => {
   await page.goto('./');
-  const tile = page.locator('#work article', { has: page.locator('video[data-autoplay]') }).first();
+  const tile = page.locator('#work article', {
+    has: page.locator('video[data-autoplay="scroll"]'),
+  });
+  await expect(tile).toHaveCount(1);
+  await expect(tile).toHaveAttribute('data-project', 'autonomous-battery-swap');
   await tile.scrollIntoViewIfNeeded();
-  const video = tile.locator('video[data-autoplay]');
+  const video = tile.locator('video');
   await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused && v.muted)).toBe(true);
-  const button = tile.getByRole('button', { name: /^Pause .* preview$/ });
-  await button.click();
+  await tile.getByRole('button', { name: /^Pause .* preview$/ }).click();
   await expect(tile.getByRole('button', { name: /^Play .* preview$/ })).toBeVisible();
   expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+});
+
+test('hover tiles play only while hovered @desktop', async ({ page }) => {
+  await page.goto('./');
+  const tile = page
+    .locator('#work article', { has: page.locator('video[data-autoplay="hover"]') })
+    .first();
+  await tile.scrollIntoViewIfNeeded();
+  const video = tile.locator('video');
+  await page.waitForTimeout(400);
+  expect(await video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+  await expect(tile.locator('[data-pause]')).toHaveCount(0);
+  await tile.locator('figure').hover();
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused)).toBe(true);
+  await page.mouse.move(0, 0);
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+});
+
+test('project pages loop the demo muted, but not with reduced motion', async ({ page }) => {
+  await page.goto('./work/surgical-robot-ar/');
+  const demo = page.locator('video[data-page-autoplay]');
+  await expect
+    .poll(() => demo.evaluate((v: HTMLVideoElement) => !v.paused && v.muted && v.loop))
+    .toBe(true);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload();
+  await page.waitForTimeout(500);
+  expect(await demo.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
 });
 
 test('home tile previews stay still with reduced motion', async ({ page }) => {

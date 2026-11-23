@@ -114,6 +114,18 @@ const { Content } = await render(project);
   </article>
 </Base>
 
+<script>
+  /** The main demo loops muted (controls stay, so it can be paused). Reduced motion: no autoplay. */
+  function autoplayDemo() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const v of document.querySelectorAll<HTMLVideoElement>('video[data-page-autoplay]')) {
+      v.muted = true;
+      void v.play().catch(() => {});
+    }
+  }
+  document.addEventListener('astro:page-load', autoplayDemo);
+</script>
+
 <style>
   .head {
     padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 5vw, 3.5rem);

@@ -35,8 +35,11 @@ const isVideoFile = media.status === 'ready' && /\.(mp4|webm)$/.test(media.src);
   ) : isVideoFile && variant === 'page' ? (
     <video
       controls
+      muted
+      loop
       playsinline
       preload="metadata"
+      data-page-autoplay
       poster={media.poster ? withBase(media.poster) : undefined}
       aria-label={media.alt}
     >
@@ -53,7 +56,7 @@ const isVideoFile = media.status === 'ready' && /\.(mp4|webm)$/.test(media.src);
       preload="none"
       poster={media.poster ? withBase(media.poster) : undefined}
       aria-hidden="true"
-      data-autoplay
+      data-autoplay={media.tilePlay ?? 'hover'}
     >
       <source src={withBase(media.preview ?? media.src)} type="video/mp4" />
     </video>

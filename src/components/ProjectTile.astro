@@ -9,7 +9,10 @@ interface Props {
 
 const { project } = Astro.props;
 const { data, id } = project;
-const moving = data.video.status === 'ready' && /\.(mp4|webm)$/.test(data.video.src);
+const moving =
+  data.video.status === 'ready' &&
+  /\.(mp4|webm)$/.test(data.video.src) &&
+  data.video.tilePlay === 'scroll';
 ---
 
 <article class="tile" data-project={id}>
@@ -42,36 +45,46 @@ const moving = data.video.status === 'ready' && /\.(mp4|webm)$/.test(data.video.
 
 <script>
   /**
-   * Tile previews play muted and looped while at least half on screen, and pause off screen
-   * (saves data and battery). Each has a pause button (WCAG 2.2.2). With reduced motion,
-   * nothing plays and the poster stays.
+   * Tile previews are muted loops. "scroll" tiles play while at least half on screen and pause
+   * off screen, with a pause button (WCAG 2.2.2). "hover" tiles play only while the pointer is
+   * over the tile (or its link has keyboard focus). With reduced motion, nothing plays.
    */
   function setup() {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const tiles = [...document.querySelectorAll<HTMLElement>('article.tile')];
-    if (reduce || !('IntersectionObserver' in window)) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          const tile = e.target as HTMLElement;
-          const video = tile.querySelector<HTMLVideoElement>('video[data-autoplay]');
-          if (!video) continue;
-          if (e.isIntersecting && !tile.dataset.userPaused) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        }
-      },
-      { threshold: 0.5 },
-    );
+    const controller = new AbortController();
+    const { signal } = controller;
+    let io: IntersectionObserver | undefined;
 
     for (const tile of tiles) {
       const video = tile.querySelector<HTMLVideoElement>('video[data-autoplay]');
-      const button = tile.querySelector<HTMLButtonElement>('[data-pause]');
-      if (!video || !button || tile.dataset.autoplayReady) continue;
+      if (!video || tile.dataset.autoplayReady) continue;
       tile.dataset.autoplayReady = 'true';
+
+      if (video.dataset.autoplay === 'hover') {
+        const play = () => void video.play().catch(() => {});
+        const stop = () => video.pause();
+        tile.addEventListener('pointerenter', play, { signal });
+        tile.addEventListener('pointerleave', stop, { signal });
+        tile.addEventListener('focusin', play, { signal });
+        tile.addEventListener('focusout', stop, { signal });
+        continue;
+      }
+
+      const button = tile.querySelector<HTMLButtonElement>('[data-pause]');
+      if (!button || !('IntersectionObserver' in window)) continue;
+      io ??= new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            const t = e.target as HTMLElement;
+            const v = t.querySelector<HTMLVideoElement>('video[data-autoplay]');
+            if (!v) continue;
+            if (e.isIntersecting && !t.dataset.userPaused) void v.play().catch(() => {});
+            else v.pause();
+          }
+        },
+        { threshold: 0.5 },
+      );
       const title = tile.querySelector('h3')?.textContent ?? 'video';
       button.hidden = false;
       const sync = () => {
@@ -79,20 +92,31 @@ const moving = data.video.status === 'ready' && /\.(mp4|webm)$/.test(data.video.
         button.setAttribute('aria-label', `${paused ? 'Play' : 'Pause'} ${title} preview`);
         button.dataset.state = paused ? 'paused' : 'playing';
       };
-      button.addEventListener('click', () => {
-        if (tile.dataset.userPaused) {
-          delete tile.dataset.userPaused;
-          video.play().catch(() => {});
-        } else {
-          tile.dataset.userPaused = 'true';
-          video.pause();
-        }
-        sync();
-      });
+      button.addEventListener(
+        'click',
+        () => {
+          if (tile.dataset.userPaused) {
+            delete tile.dataset.userPaused;
+            void video.play().catch(() => {});
+          } else {
+            tile.dataset.userPaused = 'true';
+            video.pause();
+          }
+          sync();
+        },
+        { signal },
+      );
       sync();
       io.observe(tile);
     }
-    document.addEventListener('astro:before-swap', () => io.disconnect(), { once: true });
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        io?.disconnect();
+        controller.abort();
+      },
+      { once: true },
+    );
   }
   document.addEventListener('astro:page-load', setup);
 </script>
